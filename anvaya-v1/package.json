@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-  "start:frontend": "cd frontend && npm start",
-  "start:backend": "cd backend && node src/app.js",
-  "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\""
-}
-,
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && node src/app.js",
+    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\""
+  },
   "devDependencies": {
     "concurrently": "^9.3.0"
   }
