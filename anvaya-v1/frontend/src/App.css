@@ -353,7 +353,6 @@ form[aria-label="Post a new scratch card"] button:focus:not(:disabled) {
 }
 
 /*===== Additional mobile responsiveness enhancements =====*/
-
 @media (max-width: 600px) {
   .app-outer-wrapper {
     padding-top: 56px; /* slightly reduce top padding for smaller screens */
@@ -363,6 +362,13 @@ form[aria-label="Post a new scratch card"] button:focus:not(:disabled) {
     padding: 0 16px;
     height: 56px;
     font-size: 0.9rem;
+    gap: 8px;
+  }
+
+  /* Prevent navbar items overflow/overlap */
+  .navbar > * {
+    flex-shrink: 0;
+    min-width: 0;
   }
 
   .scratch-card {

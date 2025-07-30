@@ -5,7 +5,7 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Banner images - customize as needed
+  // Banner images
   const bannerImages = [
     "https://m.media-amazon.com/images/S/al-eu-726f4d26-7fdb/e9512ab9-474c-49b4-9b56-1d004a582fd5._CR0%2C0%2C3000%2C600_SX1500_.jpg",
     "https://www.agoda.com/press/wp-content/uploads/2025/02/screenshot.png",
@@ -31,12 +31,12 @@ function Home() {
     fetchScratchCards();
   }, []);
 
-  // Banner slider with fade effect
+  // Banner slider with fade effect & responsive sizing
   const BannerSlider = ({ images, interval = 6000 }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const timeoutRef = useRef(null);
 
-    // Responsive: track window width to adjust banner height
+    // Track window width for responsiveness
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     useEffect(() => {
       const handleResize = () => setWindowWidth(window.innerWidth);
@@ -53,8 +53,8 @@ function Home() {
 
     const bannerStyle = {
       position: "relative",
-      width: "100%",            // responsive width to container
-      maxWidth: "100vw",        // prevent horizontal scroll
+      width: windowWidth <= 600 ? "100vw" : "100%",      // full viewport width on phone, container width on larger screens
+      maxWidth: "100vw",
       height: windowWidth <= 600 ? "30vh" : "50vh",
       maxHeight: windowWidth <= 600 ? "200px" : "300px",
       overflow: "hidden",
@@ -67,7 +67,7 @@ function Home() {
       zIndex: 1,
       left: "50%",
       right: "50%",
-      transform: "translateX(-50%)", // center horizontally
+      transform: "translateX(-50%)", // centers the banner horizontally safely
     };
 
     const imageStyle = {
@@ -107,7 +107,7 @@ function Home() {
     );
   };
 
-  // Wrapper style for scratch cards container to avoid any horizontal overflow
+  // Wrapper style for scratch cards container to avoid horizontal scroll on mobile
   const scratchCardsWrapperStyle = {
     width: "100%",
     maxWidth: "100vw",
@@ -128,29 +128,24 @@ function Home() {
           boxSizing: "border-box",
         }}
       >
-        {/* Banner below navbar */}
         <BannerSlider images={bannerImages} interval={6000} />
 
-        {/* Page Heading */}
         <h2 className="main-heading" style={{ paddingLeft: "16px" }}>
           All Scratch Cards
         </h2>
 
-        {/* Error message */}
         {error && (
           <div className="error-message" style={{ color: "tomato", textAlign: "center" }}>
             Error: {error}
           </div>
         )}
 
-        {/* Loading message */}
         {loading && (
           <div className="loading-message" style={{ fontStyle: "italic", textAlign: "center" }}>
             Loading scratch cards...
           </div>
         )}
 
-        {/* Scratch cards grid */}
         {!loading && !error && (
           <div className="scratch-cards-grid" style={scratchCardsWrapperStyle}>
             {scratchCards.length === 0 && (
