@@ -19,7 +19,7 @@ function Home() {
     const fetchScratchCards = async () => {
       try {
         // Fetch using the full backend URL from environment variable
-        const response = await fetch('https://final-backend-srja.onrender.com//api/scratchCards')
+        const response = await fetch('https://final-backend-srja.onrender.com/api/scratchCards')
 ;
         if (!response.ok) throw new Error("Failed to fetch scratch cards.");
         const data = await response.json();
