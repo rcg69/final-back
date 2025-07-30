@@ -27,8 +27,13 @@ export default function SearchResults() {
       setLoading(true);
       setError(null);
       try {
+        // Use full backend URL; recommended: use env variable below
+        // const baseUrl = process.env.REACT_APP_API_URL || "https://your-backend-url";
+        // Here using your actual backend URL hardcoded:
+        const baseUrl = process.env.REACT_APP_API_URL || "https://final-backend-srja.com";
+
         const res = await fetch(
-          `/api/scratchCards/search?query=${encodeURIComponent(searchTerm)}`
+          `${baseUrl}/api/scratchCards/search?query=${encodeURIComponent(searchTerm)}`
         );
         if (!res.ok) throw new Error("Failed to fetch search results.");
         const data = await res.json();
@@ -49,12 +54,17 @@ export default function SearchResults() {
     }
     let sorted = [...results];
     if (sortOption === "priceAsc") {
-      sorted.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+      sorted.sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
     } else if (sortOption === "priceDesc") {
-      sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+      sorted.sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
     } else if (sortOption === "priceRange") {
       const userPrice = parseFloat(maxPrice);
-      sorted = sorted.filter((x) => (x.price ?? 0) >= 0 && (x.price ?? 0) <= (userPrice || 0));
+      if (!isNaN(userPrice)) {
+        sorted = sorted.filter(x => {
+          const price = parseFloat(x.price);
+          return !isNaN(price) && price >= 0 && price <= userPrice;
+        });
+      }
     }
     setFilteredResults(sorted);
   }, [results, sortOption, maxPrice]);
@@ -93,7 +103,7 @@ export default function SearchResults() {
               cursor: "pointer",
             }}
             value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
+            onChange={e => setSortOption(e.target.value)}
             aria-label="Sort search results"
           >
             <option value="priceAsc">Price: Low to High</option>
@@ -112,11 +122,12 @@ export default function SearchResults() {
                 color: "#bb86fc",
                 padding: "7px 12px",
                 marginLeft: 2,
-                fontSize: ".98rem",
+                fontSize: "0.98rem",
               }}
               placeholder="Max price"
               value={maxPrice}
               onChange={e => setMaxPrice(e.target.value)}
+              aria-label="Maximum price filter"
             />
           )}
         </div>
@@ -145,119 +156,115 @@ export default function SearchResults() {
           justifyContent: "center",
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "28px",
+          gap: 28,
           maxWidth: 1200,
         }}
       >
-      {filteredResults.map((card) => (
-  <article
-    key={card._id}
-    className="scratch-card"
-    tabIndex={0}
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px",
-      padding: "16px",
-      borderRadius: "12px",
-      backgroundColor: "#232323",
-      color: "#eeeeee",
-      boxShadow: "0 4px 14px rgba(187,134,252,0.25)",
-      maxWidth: "280px",
-      // Removed userSelect: "none" here so text inside can be selected
-    }}
-  >
-    {card.imageUrl && (
-      <img
-        src={card.imageUrl}
-        alt={card.title}
-        className="scratch-card-img"
-        style={{
-          width: "100%",
-          height: "160px",
-          borderRadius: "10px",
-          objectFit: "cover",
-          marginBottom: "10px",
-          boxShadow: "0 0 10px rgba(187, 134, 252, 0.3)",
-          userSelect: "none", // images typically non-selectable is fine
-        }}
-      />
-    )}
-    <h3
-      className="scratch-card-title"
-      style={{
-        fontSize: "1.25rem",
-        fontWeight: "700",
-        color: "#bb86fc",
-        margin: 0,
-        wordWrap: "break-word",
-        userSelect: "text", // allow text selection here
-      }}
-    >
-      {card.title}
-    </h3>
-    {card.description && (
-      <p
-        className="scratch-card-description"
-        style={{
-          fontSize: "0.95rem",
-          color: "#bbbbbb",
-          margin: 0,
-          flexGrow: 1,
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-word",
-          userSelect: "text", // allow selecting description text
-        }}
-      >
-        {card.description}
-      </p>
-    )}
-    {card.price !== undefined && (
-      <p
-        className="scratch-card-price"
-        style={{
-          fontWeight: "700",
-          fontSize: "1.1rem",
-          color: "#bb86fc",
-          margin: "8px 0 0 0",
-          userSelect: "text", // allow select
-        }}
-      >
-        Price: ₹{card.price}
-      </p>
-    )}
-    {card.posterEmail && (
-      <p
-        className="scratch-card-mail"
-        style={{
-          fontSize: "0.9rem",
-          color: "#bbbbbb",
-          margin: "4px 0 0 0",
-          wordBreak: "break-word",
-          userSelect: "text", // allow select to copy email
-        }}
-      >
-        Poster Email: {card.posterEmail}
-      </p>
-    )}
-    {card.expiryDate && (
-      <p
-        className="scratch-card-expiry"
-        style={{
-          fontSize: "0.9rem",
-          color: "#bbbbbb",
-          margin: "4px 0 0 0",
-          userSelect: "text", // allow select expiry date
-        }}
-      >
-        Expiry Date: {new Date(card.expiryDate).toLocaleDateString()}
-      </p>
-    )}
-  </article>
-))}
-
-
-
+        {filteredResults.map(card => (
+          <article
+            key={card._id}
+            className="scratch-card"
+            tabIndex={0}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              padding: 16,
+              borderRadius: 12,
+              backgroundColor: "#232323",
+              color: "#eeeeee",
+              boxShadow: "0 4px 14px rgba(187,134,252,0.25)",
+              maxWidth: 280,
+            }}
+          >
+            {card.imageUrl && (
+              <img
+                src={card.imageUrl}
+                alt={card.title}
+                className="scratch-card-img"
+                style={{
+                  width: "100%",
+                  height: 160,
+                  borderRadius: 10,
+                  objectFit: "cover",
+                  marginBottom: 10,
+                  boxShadow: "0 0 10px rgba(187, 134, 252, 0.3)",
+                  userSelect: "none",
+                }}
+              />
+            )}
+            <h3
+              className="scratch-card-title"
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: 700,
+                color: "#bb86fc",
+                margin: 0,
+                wordWrap: "break-word",
+                userSelect: "text",
+              }}
+            >
+              {card.title}
+            </h3>
+            {card.description && (
+              <p
+                className="scratch-card-description"
+                style={{
+                  fontSize: "0.95rem",
+                  color: "#bbbbbb",
+                  margin: 0,
+                  flexGrow: 1,
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  userSelect: "text",
+                }}
+              >
+                {card.description}
+              </p>
+            )}
+            {card.price !== undefined && (
+              <p
+                className="scratch-card-price"
+                style={{
+                  fontWeight: 700,
+                  fontSize: "1.1rem",
+                  color: "#bb86fc",
+                  margin: "8px 0 0 0",
+                  userSelect: "text",
+                }}
+              >
+                Price: ₹{card.price}
+              </p>
+            )}
+            {card.posterEmail && (
+              <p
+                className="scratch-card-poster"
+                style={{
+                  fontSize: "0.9rem",
+                  color: "#50beff",
+                  margin: "4px 0 0 0",
+                  wordWrap: "break-word",
+                  userSelect: "text",
+                }}
+              >
+                Poster Email: {card.posterEmail}
+              </p>
+            )}
+            {card.expiryDate && (
+              <p
+                className="scratch-card-expiry"
+                style={{
+                  fontSize: "0.9rem",
+                  color: "#bbbbbb",
+                  margin: "4px 0 0 0",
+                  userSelect: "text",
+                }}
+              >
+                Expiry Date: {new Date(card.expiryDate).toLocaleDateString()}
+              </p>
+            )}
+          </article>
+        ))}
       </div>
     </main>
   );

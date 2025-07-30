@@ -1,5 +1,3 @@
-// src/components/Postcard.js
-
 import React, { useState } from "react";
 
 function Postcard() {
@@ -40,7 +38,7 @@ function Postcard() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/scratchCards", {
+      const res = await fetch(`https://final-backend-srja.onrender.com/api/scratchCards`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description, imageUrl, price, expiryDate, posterEmail }),
@@ -121,8 +119,16 @@ function Postcard() {
       <button type="submit" disabled={loading} aria-busy={loading}>
         {loading ? "Posting..." : "Post Scratch Card"}
       </button>
-      {errorMessage && <div style={{ color: "tomato", fontWeight: "600" }} role="alert">{errorMessage}</div>}
-      {successMessage && <div style={{ color: "limegreen", fontWeight: "600" }} role="status">{successMessage}</div>}
+      {errorMessage && (
+        <div style={{ color: "tomato", fontWeight: "600" }} role="alert">
+          {errorMessage}
+        </div>
+      )}
+      {successMessage && (
+        <div style={{ color: "limegreen", fontWeight: "600" }} role="status">
+          {successMessage}
+        </div>
+      )}
     </form>
   );
 }
