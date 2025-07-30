@@ -4,10 +4,8 @@
   "description": "",
   "main": "index.js",
    "scripts": {
-  "start:frontend": "cd frontend && npm start",
-  "start:backend": "cd backend && node src/app.js",
-  "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\""
-},
+    "start": "node src/app.js"  // <-- adjust path if needed
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
