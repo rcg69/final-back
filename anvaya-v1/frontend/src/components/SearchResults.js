@@ -8,11 +8,14 @@ function useQuery() {
 export default function SearchResults() {
   const query = useQuery();
   const searchTerm = query.get("query") || "";
+
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Sorting options: "priceAsc", "priceDesc", "priceRange"
   const [sortOption, setSortOption] = useState("priceAsc");
   const [maxPrice, setMaxPrice] = useState("");
 
@@ -27,13 +30,11 @@ export default function SearchResults() {
       setLoading(true);
       setError(null);
       try {
-        // Use full backend URL; recommended: use env variable below
-        // const baseUrl = process.env.REACT_APP_API_URL || "https://your-backend-url";
-        // Here using your actual backend URL hardcoded:
+        // Use environment variable or hardcoded backend URL fallback
         const baseUrl = process.env.REACT_APP_API_URL || "https://final-backend-srja.com";
 
         const res = await fetch(
-          `https://final-backend-srja.onrender.com/api/scratchCards/search?query=${encodeURIComponent(searchTerm)}`
+          `${baseUrl}/api/scratchCards/search?query=${encodeURIComponent(searchTerm)}`
         );
         if (!res.ok) throw new Error("Failed to fetch search results.");
         const data = await res.json();
@@ -44,28 +45,32 @@ export default function SearchResults() {
         setLoading(false);
       }
     };
+
     fetchResults();
   }, [searchTerm]);
 
+  // Apply sorting and filtering on the fetched results
   useEffect(() => {
     if (!results) {
       setFilteredResults([]);
       return;
     }
     let sorted = [...results];
+
     if (sortOption === "priceAsc") {
       sorted.sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
     } else if (sortOption === "priceDesc") {
       sorted.sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
     } else if (sortOption === "priceRange") {
-      const userPrice = parseFloat(maxPrice);
-      if (!isNaN(userPrice)) {
-        sorted = sorted.filter(x => {
-          const price = parseFloat(x.price);
-          return !isNaN(price) && price >= 0 && price <= userPrice;
+      const userMaxPrice = parseFloat(maxPrice);
+      if (!isNaN(userMaxPrice)) {
+        sorted = sorted.filter(item => {
+          const price = parseFloat(item.price);
+          return !isNaN(price) && price >= 0 && price <= userMaxPrice;
         });
       }
     }
+
     setFilteredResults(sorted);
   }, [results, sortOption, maxPrice]);
 
@@ -76,7 +81,7 @@ export default function SearchResults() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          marginBottom: "12px",
+          marginBottom: 12,
         }}
       >
         <h2
@@ -86,7 +91,7 @@ export default function SearchResults() {
             fontWeight: 700,
             color: "#f2f0f4ff",
             textAlign: "center",
-            marginBottom: "8px",
+            marginBottom: 8,
           }}
         >
           Search Results for &quot;{searchTerm}&quot;
@@ -108,7 +113,7 @@ export default function SearchResults() {
           >
             <option value="priceAsc">Price: Low to High</option>
             <option value="priceDesc">Price: High to Low</option>
-            <option value="priceRange">0 to price</option>
+            <option value="priceRange">Price Range</option>
           </select>
           {sortOption === "priceRange" && (
             <input
@@ -117,14 +122,15 @@ export default function SearchResults() {
               style={{
                 width: 100,
                 borderRadius: 5,
-                border: "1.4px solid #5935a8",
+                border: "1.8px solid #5935a8",
                 background: "#232323",
                 color: "#bb86fc",
                 padding: "7px 12px",
                 marginLeft: 2,
                 fontSize: "0.98rem",
+                outline: "none",
               }}
-              placeholder="Max price"
+              placeholder="Max Price"
               value={maxPrice}
               onChange={e => setMaxPrice(e.target.value)}
               aria-label="Maximum price filter"
@@ -175,6 +181,7 @@ export default function SearchResults() {
               color: "#eeeeee",
               boxShadow: "0 4px 14px rgba(187,134,252,0.25)",
               maxWidth: 280,
+              userSelect: "text", // allow copy/select
             }}
           >
             {card.imageUrl && (
@@ -191,6 +198,7 @@ export default function SearchResults() {
                   boxShadow: "0 0 10px rgba(187, 134, 252, 0.3)",
                   userSelect: "none",
                 }}
+                loading="lazy"
               />
             )}
             <h3
@@ -201,7 +209,6 @@ export default function SearchResults() {
                 color: "#bb86fc",
                 margin: 0,
                 wordWrap: "break-word",
-                userSelect: "text",
               }}
             >
               {card.title}
@@ -238,7 +245,7 @@ export default function SearchResults() {
             )}
             {card.posterEmail && (
               <p
-                className="scratch-card-poster"
+                className="scratch-card-mail"
                 style={{
                   fontSize: "0.9rem",
                   color: "#50beff",
