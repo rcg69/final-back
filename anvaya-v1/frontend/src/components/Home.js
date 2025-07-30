@@ -58,6 +58,30 @@ function Home() {
       boxSizing: "border-box",
       userSelect: "none",
       zIndex: 1,
+      maxHeight: "300px",
+
+      // Responsive height adjustment
+      "@media (max-width: 600px)": {
+        height: "30vh",
+        maxHeight: "200px",
+      },
+    };
+
+    // Note: Inline styles do not support media queries directly.
+    // We handle this with JS below instead.
+
+    // Responsive: dynamically adjust banner height based on window width
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    useEffect(() => {
+      const handleResize = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    const adjustedBannerStyle = {
+      ...bannerStyle,
+      height: windowWidth <= 600 ? "30vh" : "50vh",
+      maxHeight: windowWidth <= 600 ? "200px" : "300px",
     };
 
     const imageStyle = {
@@ -75,7 +99,7 @@ function Home() {
     };
 
     return (
-      <section aria-label="Featured scratch card banners" style={bannerStyle}>
+      <section aria-label="Featured scratch card banners" style={adjustedBannerStyle}>
         {images.map((src, idx) => {
           const isActive = idx === currentIndex;
           return (
@@ -97,38 +121,52 @@ function Home() {
     );
   };
 
+  // Responsive scratch card container wrapper style (to avoid horizontal scroll on mobiles)
+  const scratchCardsWrapperStyle = {
+    width: "100%",
+    maxWidth: "100vw",
+    padding: "0 16px",
+    boxSizing: "border-box",
+    marginLeft: "auto",
+    marginRight: "auto",
+  };
+
   return (
     <div className="app-outer-wrapper">
-      <main className="home-main" tabIndex={-1}>
+      <main
+        className="home-main"
+        tabIndex={-1}
+        style={{
+          padding: "0",
+          maxWidth: "100vw",
+          boxSizing: "border-box",
+        }}
+      >
         {/* Banner below navbar */}
         <BannerSlider images={bannerImages} interval={6000} />
 
         {/* Page Heading */}
-        <h2 className="main-heading">All Scratch Cards</h2>
+        <h2 className="main-heading" style={{ paddingLeft: "16px" }}>
+          All Scratch Cards
+        </h2>
 
         {/* Error message */}
         {error && (
-          <div
-            className="error-message"
-            style={{ color: "tomato", textAlign: "center" }}
-          >
+          <div className="error-message" style={{ color: "tomato", textAlign: "center" }}>
             Error: {error}
           </div>
         )}
 
         {/* Loading message */}
         {loading && (
-          <div
-            className="loading-message"
-            style={{ fontStyle: "italic", textAlign: "center" }}
-          >
+          <div className="loading-message" style={{ fontStyle: "italic", textAlign: "center" }}>
             Loading scratch cards...
           </div>
         )}
 
         {/* Scratch cards grid */}
         {!loading && !error && (
-          <div className="scratch-cards-grid">
+          <div className="scratch-cards-grid" style={scratchCardsWrapperStyle}>
             {scratchCards.length === 0 && (
               <div className="no-cards-message">No scratch cards available.</div>
             )}
@@ -224,11 +262,7 @@ function Home() {
                     Posted by:{" "}
                     <a
                       href={`mailto:${card.posterEmail}`}
-                      style={{
-                        color: "#50beff",
-                        textDecoration: "underline",
-                        cursor: "pointer",
-                      }}
+                      style={{ color: "#50beff", textDecoration: "underline", cursor: "pointer" }}
                     >
                       {card.posterEmail}
                     </a>
@@ -244,10 +278,7 @@ function Home() {
                       userSelect: "text",
                     }}
                   >
-                    Expires on:{" "}
-                    <strong>
-                      {new Date(card.expiryDate).toLocaleDateString()}
-                    </strong>
+                    Expires on: <strong>{new Date(card.expiryDate).toLocaleDateString()}</strong>
                   </p>
                 )}
               </article>

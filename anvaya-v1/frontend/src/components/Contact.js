@@ -1,7 +1,17 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 function Contact() {
   const termsRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect screen width for responsiveness
+  useEffect(() => {
+    const checkScreen = () => setIsMobile(window.innerWidth <= 600);
+    checkScreen();
+
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   const handleScroll = () => {
     const el = termsRef.current;
@@ -36,6 +46,10 @@ function Contact() {
           maxWidth: 660,
           width: "100%",
           marginTop: 36,
+
+          // Responsive adjustments for mobile
+          padding: isMobile ? "20px 12px" : undefined,
+          marginTop: isMobile ? 20 : 36,
         }}
       >
         {/* About Us Block */}
@@ -44,7 +58,7 @@ function Contact() {
             background: "rgba(40, 38, 66, 0.95)",
             borderRadius: 18,
             boxShadow: "0 8px 32px rgba(187,134,252,0.15), 0 2px 8px rgba(0,0,0,0.18)",
-            padding: "36px 32px",
+            padding: isMobile ? "24px 18px" : "36px 32px",
             color: "#eeeeee",
             backdropFilter: "blur(7px)",
             marginBottom: 28,
@@ -56,7 +70,7 @@ function Contact() {
               color: "#bb86fc",
               marginBottom: 15,
               fontWeight: 900,
-              fontSize: "2.1rem",
+              fontSize: isMobile ? "1.8rem" : "2.1rem",
               textShadow: "0 2px 8px #4a00e041",
               letterSpacing: 1,
               textAlign: "center",
@@ -67,13 +81,20 @@ function Contact() {
           <p
             style={{
               color: "#bbb",
-              fontSize: "1.15rem",
+              fontSize: isMobile ? "1rem" : "1.15rem",
               textAlign: "center",
               lineHeight: 1.6,
               margin: 0,
             }}
           >
-            We are committed to providing a secure, transparent, and trustworthy marketplace for buying and selling scratch cards. If you have any questions, feedback, or need assistance with your account or transactions, please don’t hesitate to reach out. Our dedicated support team is here to help resolve any disputes and ensure a smooth experience on the platform. We value your trust and strive to maintain the highest standards of security and user satisfaction in every interaction.
+            We are committed to providing a secure, transparent, and trustworthy
+            marketplace for buying and selling scratch cards. If you have any
+            questions, feedback, or need assistance with your account or
+            transactions, please don’t hesitate to reach out. Our dedicated
+            support team is here to help resolve any disputes and ensure a
+            smooth experience on the platform. We value your trust and strive to
+            maintain the highest standards of security and user satisfaction in
+            every interaction.
           </p>
         </section>
 
@@ -85,22 +106,22 @@ function Contact() {
             background: "rgba(40, 38, 66, 0.85)",
             borderRadius: 18,
             boxShadow: "0 8px 32px rgba(100,100,150,0.12), 0 2px 10px rgba(0,0,0,0.1)",
-            padding: "32px 28px",
+            padding: isMobile ? "24px 20px" : "32px 28px",
             color: "#ddd",
             backdropFilter: "blur(5px)",
             border: "1.5px solid #775fcfbb",
-            maxHeight: "420px",
+            maxHeight: isMobile ? "320px" : "420px",
             overflowY: "auto",
             lineHeight: 1.5,
           }}
         >
-          {/* Terms & Conditions content same as before */}
+          {/* Terms & Conditions content unchanged */}
           <h2
             style={{
               color: "#9E78FA",
               fontWeight: 800,
               textAlign: "center",
-              fontSize: "1.9rem",
+              fontSize: isMobile ? "1.6rem" : "1.9rem",
               marginBottom: 20,
               letterSpacing: 1,
               textShadow: "0 1px 8px #976efa50",
@@ -109,49 +130,53 @@ function Contact() {
             Terms and Conditions
           </h2>
 
-          <h3 style={{ color: "#bb86fc", marginTop: 0, marginBottom: 10, fontWeight: 700 }}>
-            General Commitment
-          </h3>
-          <p>
-            We are committed to providing a secure, transparent, and trustworthy marketplace for buying and selling scratch cards. Our platform strives to maintain the highest standards of security and user satisfaction.
-          </p>
-
-          <h3 style={{ color: "#bb86fc", marginTop: 15, marginBottom: 10, fontWeight: 700 }}>
-            User Responsibility
-          </h3>
-          <p>
-            Users are responsible for verifying the authenticity and validity of any scratch cards purchased on the platform. We recommend exercising due diligence before completing any transactions.
-          </p>
-
-          <h3 style={{ color: "#bb86fc", marginTop: 15, marginBottom: 10, fontWeight: 700 }}>
-            Limitation of Liability
-          </h3>
-          <p>
-            We do not accept responsibility or liability for any losses, damages, or disputes arising from:
-          </p>
-          <ul style={{ paddingLeft: 20, marginTop: 5, color: "#ccc" }}>
-            <li>Miscommunication between users,</li>
-            <li>Fraudulent activities conducted by any party,</li>
-            <li>Payment issues beyond our platform’s control,</li>
-            <li>The sale or distribution of fake or counterfeit scratch cards.</li>
-          </ul>
-
-          <h3 style={{ color: "#bb86fc", marginTop: 15, marginBottom: 10, fontWeight: 700 }}>
-            Dispute Resolution
-          </h3>
-          <p>
-            While our dedicated support team is available to assist with account issues and transaction disputes, we cannot guarantee the resolution of disputes related to fraudulent cards or external payment failures.
-          </p>
-
-          <h3 style={{ color: "#bb86fc", marginTop: 15, marginBottom: 10, fontWeight: 700 }}>
-            User Agreement
-          </h3>
-          <p>
-            By using our platform, you acknowledge and accept these terms and agree to take full responsibility for your transactions. We encourage all users to report suspicious activities or listings immediately.
-          </p>
+          {[{
+            title: "General Commitment",
+            content: "We are committed to providing a secure, transparent, and trustworthy marketplace for buying and selling scratch cards. Our platform strives to maintain the highest standards of security and user satisfaction.",
+          }, {
+            title: "User Responsibility",
+            content: "Users are responsible for verifying the authenticity and validity of any scratch cards purchased on the platform. We recommend exercising due diligence before completing any transactions."
+          }, {
+            title: "Limitation of Liability",
+            content: "We do not accept responsibility or liability for any losses, damages, or disputes arising from:",
+            list: [
+              "Miscommunication between users,",
+              "Fraudulent activities conducted by any party,",
+              "Payment issues beyond our platform’s control,",
+              "The sale or distribution of fake or counterfeit scratch cards."
+            ]
+          }, {
+            title: "Dispute Resolution",
+            content: "While our dedicated support team is available to assist with account issues and transaction disputes, we cannot guarantee the resolution of disputes related to fraudulent cards or external payment failures."
+          }, {
+            title: "User Agreement",
+            content: "By using our platform, you acknowledge and accept these terms and agree to take full responsibility for your transactions. We encourage all users to report suspicious activities or listings immediately."
+          }].map(({ title, content, list }) => (
+            <div key={title} style={{ marginTop: title === "General Commitment" ? 0 : 15 }}>
+              <h3 style={{ color: "#bb86fc", marginBottom: 10, fontWeight: 700 }}>
+                {title}
+              </h3>
+              <p>
+                {content}
+              </p>
+              {list && (
+                <ul style={{ paddingLeft: 20, marginTop: 5, color: "#ccc" }}>
+                  {list.map((item, idx) => <li key={idx}>{item}</li>)}
+                </ul>
+              )}
+            </div>
+          ))}
         </section>
 
-        <p style={{ color: "#bbbbbb", fontSize: "1rem", lineHeight: 1.5, marginTop: 16, textAlign: "center" }}>
+        <p
+          style={{
+            color: "#bbbbbb",
+            fontSize: isMobile ? "0.9rem" : "1rem",
+            lineHeight: 1.5,
+            marginTop: 16,
+            textAlign: "center",
+          }}
+        >
           Explore features like posting scratch cards, managing your personalized list, and easily reaching our support through the Contact page.
         </p>
 
@@ -160,12 +185,14 @@ function Contact() {
           className="developer-info"
           style={{
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             alignItems: "center",
             gap: 22,
             marginTop: 48,
             paddingTop: 24,
             borderTop: "1.5px solid #463268",
             background: "linear-gradient(90deg, transparent 0%, #23232380 35%, transparent 100%)",
+            textAlign: isMobile ? "center" : "left"
           }}
         >
           {/* Developer Picture */}
@@ -180,6 +207,7 @@ function Contact() {
               boxShadow: "0 0 24px 2px rgba(187, 134, 252, 0.46)",
               border: "3.5px solid #bb86fc33",
               background: "#18102a",
+              margin: isMobile ? "0 auto 16px auto" : undefined,
             }}
           />
 
