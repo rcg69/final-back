@@ -49,45 +49,55 @@ function App() {
     },
   };
 
+  // Responsive styles for the container which holds sign-in/sign-up forms
+  const authContainerStyle = {
+    maxWidth: 400,
+    width: "90%",           // Use 90% width for responsiveness
+    padding: "20px 24px",   // Slightly reduced padding on mobile
+    backgroundColor: "#121212",
+    color: "#eeeeee",
+    fontFamily: "inherit",
+    textAlign: "center",
+    borderRadius: 12,
+    boxShadow: "0 0 20px rgba(187, 134, 252, 0.6)",
+    boxSizing: "border-box",
+    margin: "20px",         // Margin added for breathing room
+    // Ensure it is scrollable on very small devices if necessary
+    overflowWrap: "break-word",
+  };
+
+  // Wrapper style that centers content vertically and horizontally,
+  // with responsive padding & flex-wrap to adapt on small height/screen
+  const outerWrapperStyle = {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "100vh",
+    width: "100vw",
+    backgroundColor: "#121212",
+    padding: "20px 10px",      // Added horizontal padding for small devices
+    boxSizing: "border-box",
+    flexWrap: "wrap",           // Allow wrapping if needed on very small devices
+  };
+
   return (
     <ClerkProvider publishableKey={publishableKey}>
-      {/* Container centers the auth forms and main app vertically and horizontally */}
-      <div
-        className="app-outer-wrapper"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          width: "100vw",
-          backgroundColor: "#121212",
-        }}
-      >
-        {/* Show sign-in or sign-up forms only when signed out */}
+      <div style={outerWrapperStyle}>
+        {/* Show sign-in/sign-up when user is signed out */}
         <SignedOut>
-          <div
-            className="clerk-auth-container"
-            style={{
-              maxWidth: 400,
-              width: "100%",
-              paddingTop: 40,
-              backgroundColor: "#121212",
-              color: "#eeeeee",
-              fontFamily: "inherit",
-              textAlign: "center",
-            }}
-          >
+          <div style={authContainerStyle}>
             <h2>{showSignIn ? "Please sign in" : "Create an account"}</h2>
 
-            {/* Render SignIn or SignUp component based on state */}
             {showSignIn ? (
               <SignIn appearance={clerkAppearance} />
             ) : (
               <SignUp appearance={clerkAppearance} />
             )}
 
-            {/* Toggle link for switching between SignIn and SignUp forms */}
-            <div className="clerk-signup-hint" style={{ marginTop: 16 }}>
+            <div
+              className="clerk-toggle-container"
+              style={{ marginTop: 16, fontSize: "0.9rem" }}
+            >
               {showSignIn ? (
                 <>
                   <span>Don't have an account?</span>
@@ -104,11 +114,14 @@ function App() {
                       userSelect: "none",
                       fontFamily:
                         "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-                      fontSize: "1rem",
                       fontWeight: "600",
                     }}
-                    onMouseOver={(e) => (e.currentTarget.style.color = "#9a69e0")}
-                    onMouseOut={(e) => (e.currentTarget.style.color = "#bb86fc")}
+                    onMouseOver={(e) =>
+                      (e.currentTarget.style.color = "#9a69e")
+                    }
+                    onMouseOut={(e) =>
+                      (e.currentTarget.style.color = "#bb86fc")
+                    }
                     onFocus={(e) => (e.currentTarget.style.outline = "none")}
                     aria-label="Switch to Sign Up"
                   >
@@ -131,11 +144,14 @@ function App() {
                       userSelect: "none",
                       fontFamily:
                         "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-                      fontSize: "1rem",
                       fontWeight: "600",
                     }}
-                    onMouseOver={(e) => (e.currentTarget.style.color = "#9a69e0")}
-                    onMouseOut={(e) => (e.currentTarget.style.color = "#bb86fc")}
+                    onMouseOver={(e) =>
+                      (e.currentTarget.style.color = "#9a69e")
+                    }
+                    onMouseOut={(e) =>
+                      (e.currentTarget.style.color = "#bb86fc")
+                    }
                     onFocus={(e) => (e.currentTarget.style.outline = "none")}
                     aria-label="Switch to Sign In"
                   >
@@ -147,7 +163,7 @@ function App() {
           </div>
         </SignedOut>
 
-        {/* Main app content rendered only when signed in */}
+        {/* Show app when user is signed in */}
         <SignedIn>
           <BrowserRouter>
             <Navbar />
