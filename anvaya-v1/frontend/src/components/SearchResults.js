@@ -34,7 +34,7 @@ export default function SearchResults() {
         const baseUrl = process.env.REACT_APP_API_URL || "https://final-backend-srja.com";
 
         const res = await fetch(
-          `${baseUrl}/api/scratchCards/search?query=${encodeURIComponent(searchTerm)}`
+          `https://final-backend-srja.onrender.com/api/scratchCards/search?query=${encodeURIComponent(searchTerm)}`
         );
         if (!res.ok) throw new Error("Failed to fetch search results.");
         const data = await res.json();
