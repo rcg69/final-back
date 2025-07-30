@@ -1,8 +1,11 @@
 import React from "react";
-import ReactDOM from "react-dom/client"; // Not "react-dom"
+import ReactDOM from "react-dom/client"; // React 18 new root API
 import App from "./App";
-// In index.js or App.js
-import './App.css'; 
+import "./App.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

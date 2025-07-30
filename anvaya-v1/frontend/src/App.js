@@ -30,13 +30,14 @@ const NotFound = () => (
   </div>
 );
 
+// TODO: Replace with your production publishable key before deployment
 const publishableKey = "pk_test_c2FmZS1lZ3JldC0yMi5jbGVyay5hY2NvdW50cy5kZXYk";
 
 function App() {
-  // State to track if showing signIn or signUp
+  // State to toggle between sign in and sign up forms
   const [showSignIn, setShowSignIn] = useState(true);
 
-  // Shared Clerk appearance for both forms (only colors & fonts here)
+  // Shared appearance settings for Clerk auth forms (colors & fonts)
   const clerkAppearance = {
     baseTheme: "dark",
     variables: {
@@ -50,19 +51,19 @@ function App() {
 
   return (
     <ClerkProvider publishableKey={publishableKey}>
-      {/* Center the sign-in/sign-up container */}
+      {/* Container centers the auth forms and main app vertically and horizontally */}
       <div
         className="app-outer-wrapper"
         style={{
-          display: "flex", // enable flexbox
-          justifyContent: "center", // center horizontally
-          alignItems: "center", // center vertically
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           height: "100vh",
           width: "100vw",
           backgroundColor: "#121212",
         }}
       >
-        {/* Render SignIn / SignUp when user is signed out */}
+        {/* Show sign-in or sign-up forms only when signed out */}
         <SignedOut>
           <div
             className="clerk-auth-container"
@@ -78,12 +79,14 @@ function App() {
           >
             <h2>{showSignIn ? "Please sign in" : "Create an account"}</h2>
 
+            {/* Render SignIn or SignUp component based on state */}
             {showSignIn ? (
               <SignIn appearance={clerkAppearance} />
             ) : (
               <SignUp appearance={clerkAppearance} />
             )}
 
+            {/* Toggle link for switching between SignIn and SignUp forms */}
             <div className="clerk-signup-hint" style={{ marginTop: 16 }}>
               {showSignIn ? (
                 <>
@@ -107,6 +110,7 @@ function App() {
                     onMouseOver={(e) => (e.currentTarget.style.color = "#9a69e0")}
                     onMouseOut={(e) => (e.currentTarget.style.color = "#bb86fc")}
                     onFocus={(e) => (e.currentTarget.style.outline = "none")}
+                    aria-label="Switch to Sign Up"
                   >
                     Sign Up
                   </button>
@@ -133,6 +137,7 @@ function App() {
                     onMouseOver={(e) => (e.currentTarget.style.color = "#9a69e0")}
                     onMouseOut={(e) => (e.currentTarget.style.color = "#bb86fc")}
                     onFocus={(e) => (e.currentTarget.style.outline = "none")}
+                    aria-label="Switch to Sign In"
                   >
                     Sign In
                   </button>
@@ -142,7 +147,7 @@ function App() {
           </div>
         </SignedOut>
 
-        {/* Render App when user is signed in */}
+        {/* Main app content rendered only when signed in */}
         <SignedIn>
           <BrowserRouter>
             <Navbar />
