@@ -1,0 +1,97 @@
+.mylist-container {
+  padding: 20px;
+  background-color: #1e1e1e;
+  color: #eeeeee;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.mylist-container h2 {
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #bb86fc;
+}
+
+.mylist-form {
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.mylist-form input[type="text"] {
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #444444;
+  background-color: #232323;
+  color: #eeeeee;
+  flex: 1 1 150px;
+  min-width: 120px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.mylist-form input[type="text"]:focus {
+  border-color: #bb86fc;
+  box-shadow: 0 0 8px rgba(187, 134, 252, 0.6);
+}
+
+.mylist-form button {
+  padding: 8px 16px;
+  background-color: #bb86fc;
+  color: #1e1e1e;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.mylist-form button:hover,
+.mylist-form button:focus {
+  background-color: #9a69e0;
+  outline: none;
+}
+
+.mylist-list {
+  list-style: none;
+  padding-left: 0;
+  max-width: 420px;
+}
+
+.mylist-list li {
+  margin-bottom: 10px;
+  border: 1px solid #444444;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #232323;
+}
+
+.mylist-list strong {
+  font-weight: 700;
+  color: #eeeeee;
+}
+
+.mylist-remove-btn {
+  background-color: #bb86fc;
+  border: none;
+  border-radius: 4px;
+  color: #1e1e1e;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.mylist-remove-btn:hover,
+.mylist-remove-btn:focus {
+  background-color: #9a69e0;
+  outline: none;
+}

@@ -1,0 +1,30 @@
+.contact-container {
+  padding: 20px;
+  background-color: #1e1e1e;
+  color: #eeeeee;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.contact-container h2 {
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 12px;
+  color: #bb86fc;
+}
+
+.contact-container p {
+  font-size: 16px;
+  color: #bbbbbb;
+}
+
+.contact-container a {
+  color: #bb86fc;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contact-container a:hover,
+.contact-container a:focus {
+  text-decoration: underline;
+  outline: none;
+}
