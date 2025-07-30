@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const cardId = req.params.id;
-    const { posterEmail } = req.body; // Expect posterEmail to authorize delete
+    const { posterEmail } = req.body; // posterEmail required to authorize delete
 
     if (!posterEmail) {
       return res.status(400).json({ error: 'posterEmail is required to delete scratch card' });
@@ -93,6 +93,9 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to delete scratch card' });
   }
 });
+
+// GET /api/scratchCards/search?query=...
+// Search scratch cards by title or description matching query (case-insensitive), excluding expired cards
 router.get('/search', async (req, res) => {
   try {
     const { query } = req.query;
