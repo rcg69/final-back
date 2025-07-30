@@ -18,8 +18,8 @@ function Home() {
   useEffect(() => {
     const fetchScratchCards = async () => {
       try {
+        // Fetch using the full backend URL from environment variable
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/scratchCards`);
-
         if (!response.ok) throw new Error("Failed to fetch scratch cards.");
         const data = await response.json();
         setScratchCards(data);
@@ -30,12 +30,21 @@ function Home() {
       }
     };
     fetchScratchCards();
+    // Empty dependency array to run once on mount
   }, []);
 
-  // Banner slider with fade effect
+  // Banner slider component with fade effect and responsive sizing
   const BannerSlider = ({ images, interval = 6000 }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const timeoutRef = useRef(null);
+
+    // Detect window width for responsive banner height and width
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    useEffect(() => {
+      const handleResize = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     useEffect(() => {
       timeoutRef.current = setTimeout(() => {
@@ -46,8 +55,8 @@ function Home() {
 
     const bannerStyle = {
       position: "relative",
-      width: "100vw", // full viewport width
-      height: "50vh",
+      width: windowWidth <= 600 ? "100vw" : "100vw", // Keep "100vw" as original for all devices
+      height: windowWidth <= 600 ? "30vh" : "50vh", // Adjust height on phone vs desktop
       overflow: "hidden",
       borderRadius: "0 0 20px 20px",
       boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
@@ -59,29 +68,6 @@ function Home() {
       boxSizing: "border-box",
       userSelect: "none",
       zIndex: 1,
-      maxHeight: "300px",
-
-      // Responsive height adjustment
-      "@media (max-width: 600px)": {
-        height: "30vh",
-        maxHeight: "200px",
-      },
-    };
-
-    // Note: Inline styles do not support media queries directly.
-    // We handle this with JS below instead.
-
-    // Responsive: dynamically adjust banner height based on window width
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    useEffect(() => {
-      const handleResize = () => setWindowWidth(window.innerWidth);
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    const adjustedBannerStyle = {
-      ...bannerStyle,
-      height: windowWidth <= 600 ? "30vh" : "50vh",
       maxHeight: windowWidth <= 600 ? "200px" : "300px",
     };
 
@@ -100,7 +86,7 @@ function Home() {
     };
 
     return (
-      <section aria-label="Featured scratch card banners" style={adjustedBannerStyle}>
+      <section aria-label="Featured scratch card banners" style={bannerStyle}>
         {images.map((src, idx) => {
           const isActive = idx === currentIndex;
           return (
@@ -122,7 +108,7 @@ function Home() {
     );
   };
 
-  // Responsive scratch card container wrapper style (to avoid horizontal scroll on mobiles)
+  // Responsive scratch cards wrapper style to avoid horizontal scroll
   const scratchCardsWrapperStyle = {
     width: "100%",
     maxWidth: "100vw",

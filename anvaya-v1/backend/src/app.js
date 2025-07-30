@@ -10,7 +10,7 @@ const app = express();
 
 // Enable CORS - use FRONTEND_URL env variable for flexibility
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://anvaya-render1.onrender.com",  // Replace * with actual frontend URL in production
+  origin: process.env.FRONTEND_URL || "https://final-back-fiov.onrender.com",  // Replace * with actual frontend URL in production
   optionsSuccessStatus: 200
 }));
 
