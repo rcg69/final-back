@@ -7,12 +7,12 @@ function Home() {
 
   // Banner images
   const bannerImages = [
-    "https://m.media-amazon.com/images/S/al-eu726f26...726j.jpg",
-    "https://www.agoda.com/press/wp-content/uploa...png",
-    "https://www.abhibus.com/blog/uploads/abhibus.jpg",
-    "https://businessmodelnavigator.com/img/logo.png",
-    "https://palmonas.com/cdn/shop/files/banner1.jpg",
-    "https://encrypted-tbn0.gstatic.com/images?q=abc",
+    "https://m.media-amazon.com/images/S/al-eu-726f4d26-7fdb/e9512ab9-474c-49b4-9b56-1d004a582fd5._CR0%2C0%2C3000%2C600_SX1500_.jpg",
+    "https://www.agoda.com/press/wp-content/uploads/2025/02/screenshot.png",
+    "https://www.abhibus.com/blog/wp-content/uploads/2023/05/abhiubs-logo-696x423.jpg",
+    "https://businessmodelnavigator.com/img/case-firms-logos/42.png",
+    "https://palmonas.com/cdn/shop/files/web_link_creative_2.jpg?v=1738936545",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_m9RRzlBWRBBpX39bUde7w0vwFN2IUpW68A&s"
   ];
 
   useEffect(() => {

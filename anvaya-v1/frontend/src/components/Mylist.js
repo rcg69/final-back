@@ -1,24 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 
-// Full desktop/laptop banner images
+// Banner images array
 const bannerImages = [
   "https://palmonas.com/cdn/shop/files/daily_ware_c32bcc0d-4cd5-41c3-8868-e24936980c93.jpg?v=1752847287&width=1500",
   "https://w0.peakpx.com/wallpaper/211/633/HD-wallpaper-starbucks-coffee-brands-cafe-green-men-simple-women.jpg",
   "https://pbs.twimg.com/media/DENKKAuUQAEEsKN.jpg:large",
   "https://www.trueblueadvisory.com/wp-content/uploads/2022/06/case-study_0012_ajio.jpg",
   "https://palmonas.com/cdn/shop/files/lgd_mob_2_7c31140d-dffe-4b90-b03a-8ff410349811.webp?v=1744178192&width=750",
-  "https://variety.com/wp-content/uploads/2019/03/netflix-logo-n-icon.png?w=1000&h=667&crop=1",
+  "https://variety.com/wp-content/uploads/2019/03/netflix-logo-n-icon.png?w=1000&h=667&crop=1"
 ];
 
-// Smaller or alternative banner images for mobile
-const mobileBannerImages = [
-  "https://www.agoda.com/press/wp-content/uploads/2025/02/screenshot.png",
-  "https://www.abhibus.com/blog/wp-content/uploads/2023/05/abhibus-logo-696x423.jpg",
-  "https://businessmodelnavigator.com/img/case-firms-logos/42.png",
-  "https://palmonas.com/cdn/shop/files/web_link_creative_2.jpg?v=1738936545",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_m9RRzlBWRBBpX39bUde7w0vwFN2IUpW68A&s",
-];
-
+// BannerSlideshow component that slides images with animation
 function BannerSlideshow({ images, direction = "left", initialIndex = 0, controlIndex, onIndexChange }) {
   const [index, setIndex] = useState(initialIndex);
   const timeoutRef = useRef();
@@ -33,7 +25,7 @@ function BannerSlideshow({ images, direction = "left", initialIndex = 0, control
     if (typeof controlIndex === "number") return;
 
     timeoutRef.current = setTimeout(() => {
-      setIndex((prev) => {
+      setIndex(prev => {
         const next = (prev + 1) % images.length;
         if (onIndexChange) onIndexChange(next);
         return next;
@@ -61,7 +53,7 @@ function BannerSlideshow({ images, direction = "left", initialIndex = 0, control
     <div
       style={{
         position: "relative",
-        width: "330px", // 220px * 1.5 as before
+        width: "330px", // 220px * 1.5
         height: "630px", // 420px * 1.5
         overflow: "hidden",
         borderRadius: "18px",
@@ -91,7 +83,7 @@ function BannerSlideshow({ images, direction = "left", initialIndex = 0, control
           }}
         />
       ))}
-      {/* Dots removed as per your previous request */}
+      {/* Dots removed as per request */}
     </div>
   );
 }
@@ -103,16 +95,6 @@ export default function Mylist() {
   const [mainBannerIndex, setMainBannerIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Conditionally choose banners for mobile or desktop
-  const bannersToShow = windowWidth <= 600 ? mobileBannerImages : bannerImages;
 
   // Load cards from sessionStorage on mount
   useEffect(() => {
@@ -128,7 +110,7 @@ export default function Mylist() {
     setLoading(false);
   }, []);
 
-  // Save cards to sessionStorage whenever they change
+  // Save to sessionStorage whenever cards change
   useEffect(() => {
     sessionStorage.setItem("mylistCards", JSON.stringify(cards));
   }, [cards]);
@@ -137,13 +119,13 @@ export default function Mylist() {
     e.preventDefault();
     if (cardNumber.trim() === "" || cardName.trim() === "") return;
     const newCard = { id: Date.now(), number: cardNumber.trim(), name: cardName.trim() };
-    setCards((prev) => [...prev, newCard]);
+    setCards(prev => [...prev, newCard]);
     setCardNumber("");
     setCardName("");
   };
 
   const handleRemove = (id) => {
-    setCards((prev) => prev.filter((card) => card.id !== id));
+    setCards(prev => prev.filter(card => card.id !== id));
   };
 
   const homeBackground = "linear-gradient(135deg, #080808ff 100%)";
@@ -170,14 +152,11 @@ export default function Mylist() {
           justifyContent: "center",
           width: "100%",
           maxWidth: 1850,
-          flexWrap: windowWidth <= 600 ? "wrap" : "nowrap", // Wrap on mobile for better layout
-          padding: windowWidth <= 600 ? "0 12px" : 0,
-          boxSizing: "border-box",
         }}
       >
         {/* Left Banner */}
         <BannerSlideshow
-          images={bannersToShow}
+          images={bannerImages}
           direction="left"
           initialIndex={mainBannerIndex}
           onIndexChange={setMainBannerIndex}
@@ -196,7 +175,6 @@ export default function Mylist() {
             backdropFilter: "blur(8px)",
             boxSizing: "border-box",
             minHeight: 500,
-            marginTop: windowWidth <= 600 ? 24 : 0,
           }}
         >
           <h2
@@ -283,8 +261,8 @@ export default function Mylist() {
                 transition: "filter 0.3s ease",
                 userSelect: "none",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.15)")}
-              onMouseLeave={(e) => (e.currentTarget.style.filter = "brightness(1)")}
+              onMouseEnter={e => (e.currentTarget.style.filter = "brightness(1.15)")}
+              onMouseLeave={e => (e.currentTarget.style.filter = "brightness(1)")}
             >
               Add Card
             </button>
@@ -388,8 +366,8 @@ export default function Mylist() {
                       transition: "filter 0.25s ease",
                       userSelect: "none",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.15)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.filter = "brightness(1)")}
+                    onMouseEnter={e => (e.currentTarget.style.filter = "brightness(1.15)")}
+                    onMouseLeave={e => (e.currentTarget.style.filter = "brightness(1)")}
                   >
                     Remove
                   </button>
@@ -401,9 +379,9 @@ export default function Mylist() {
 
         {/* Right Banner */}
         <BannerSlideshow
-          images={bannersToShow}
+          images={bannerImages}
           direction="right"
-          controlIndex={(mainBannerIndex + 1) % bannersToShow.length}
+          controlIndex={(mainBannerIndex + 1) % bannerImages.length}
         />
       </div>
     </div>

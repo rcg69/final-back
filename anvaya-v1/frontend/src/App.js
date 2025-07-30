@@ -30,14 +30,13 @@ const NotFound = () => (
   </div>
 );
 
-// TODO: Replace with your production publishable key before deployment
+// Reminder: replace with your production key before deployment
 const publishableKey = "pk_test_c2FmZS1lZ3JldC0yMi5jbGVyay5hY2NvdW50cy5kZXYk";
 
 function App() {
-  // State to toggle between sign in and sign up forms
   const [showSignIn, setShowSignIn] = useState(true);
 
-  // Shared appearance settings for Clerk auth forms (colors & fonts)
+  // Clerk appearance for consistent styling of auth forms and inputs
   const clerkAppearance = {
     baseTheme: "dark",
     variables: {
@@ -45,48 +44,89 @@ function App() {
       colorBackground: "#121212",
       colorText: "#eeeeee",
       colorInputBackground: "#1e1e1e",
-      colorInputBorder: "#333333",
+      colorInputBorder: "#444",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      fontSizeBase: "16px",
+      fontSizeInput: "1rem",
+      fontSizeButton: "1rem",
+      borderRadius: "10px",
+      spacingSpaceSmall: "12px",
+    },
+    elements: {
+      formButtonPrimary:
+        "box-shadow: 0 0 10px #bb86fc; transition: filter 0.2s ease;",
+      formButtonPrimaryHover: "filter: brightness(1.15);",
+      formInput: `
+        padding: 12px 14px !important;
+        border-radius: 10px !important;
+        font-size: 1rem !important;
+        box-sizing: border-box !important;
+        margin-bottom: 16px !important;
+      `,
+      formInputFocused:
+        "border-color: #bb86fc !important; box-shadow: 0 0 8px #bb86fc !important;",
     },
   };
 
-  // Responsive styles for the container which holds sign-in/sign-up forms
-  const authContainerStyle = {
-    maxWidth: 400,
-    width: "90%",           // Use 90% width for responsiveness
-    padding: "20px 24px",   // Slightly reduced padding on mobile
-    backgroundColor: "#121212",
-    color: "#eeeeee",
-    fontFamily: "inherit",
-    textAlign: "center",
-    borderRadius: 12,
-    boxShadow: "0 0 20px rgba(187, 134, 252, 0.6)",
-    boxSizing: "border-box",
-    margin: "20px",         // Margin added for breathing room
-    // Ensure it is scrollable on very small devices if necessary
-    overflowWrap: "break-word",
-  };
-
-  // Wrapper style that centers content vertically and horizontally,
-  // with responsive padding & flex-wrap to adapt on small height/screen
+  // Outer container centers the auth box, with responsive padding for laptops and mobiles
   const outerWrapperStyle = {
+    minHeight: "100vh",
+    width: "100vw",
+    padding: "20px 16px", // ample padding on sides on all screen sizes
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: "100vh",
-    width: "100vw",
     backgroundColor: "#121212",
-    padding: "20px 10px",      // Added horizontal padding for small devices
     boxSizing: "border-box",
-    flexWrap: "wrap",           // Allow wrapping if needed on very small devices
+    flexWrap: "wrap", // allows wrapping if needed on small heights or very narrow screens
+  };
+
+  // Container for sign-in/sign-up forms with max-width & width responsive to screen
+  const authContainerStyle = {
+    maxWidth: 400,
+    width: "100%", // full width inside padding on very small phones
+    padding: "30px 24px",
+    backgroundColor: "#121212",
+    borderRadius: 14,
+    boxShadow: "0 0 20px rgba(187, 134, 252, 0.7)",
+    boxSizing: "border-box",
+    color: "#eeeeee",
+    fontFamily: clerkAppearance.variables.fontFamily,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch", // stretch inputs full width
+    margin: "0 auto",
+  };
+
+  // Title style scales well for laptop and mobile users
+  const titleStyle = {
+    textAlign: "center",
+    marginBottom: 24,
+    fontWeight: 900,
+    fontSize: "2rem",
+    userSelect: "none",
+  };
+
+  // Toggle link styles
+  const toggleLinkStyle = {
+    all: "unset",
+    color: "#bb86fc",
+    cursor: "pointer",
+    textDecoration: "underline",
+    marginLeft: 8,
+    userSelect: "none",
+    fontFamily: clerkAppearance.variables.fontFamily,
+    fontWeight: 600,
   };
 
   return (
     <ClerkProvider publishableKey={publishableKey}>
       <div style={outerWrapperStyle}>
-        {/* Show sign-in/sign-up when user is signed out */}
         <SignedOut>
-          <div style={authContainerStyle}>
-            <h2>{showSignIn ? "Please sign in" : "Create an account"}</h2>
+          <main style={authContainerStyle}>
+            <h2 style={titleStyle}>
+              {showSignIn ? "Please sign in" : "Create an account"}
+            </h2>
 
             {showSignIn ? (
               <SignIn appearance={clerkAppearance} />
@@ -94,35 +134,21 @@ function App() {
               <SignUp appearance={clerkAppearance} />
             )}
 
-            <div
-              className="clerk-toggle-container"
-              style={{ marginTop: 16, fontSize: "0.9rem" }}
-            >
+            <div style={{ textAlign: "center", marginTop: 16, fontSize: 14 }}>
               {showSignIn ? (
                 <>
-                  <span>Don't have an account?</span>
+                  Don't have an account?{" "}
                   <button
                     type="button"
                     className="clerk-toggle-button"
                     onClick={() => setShowSignIn(false)}
-                    style={{
-                      all: "unset",
-                      color: "#bb86fc",
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      marginLeft: 8,
-                      userSelect: "none",
-                      fontFamily:
-                        "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-                      fontWeight: "600",
-                    }}
+                    style={toggleLinkStyle}
                     onMouseOver={(e) =>
-                      (e.currentTarget.style.color = "#9a69e")
+                      (e.currentTarget.style.color = "#9a69e0")
                     }
                     onMouseOut={(e) =>
                       (e.currentTarget.style.color = "#bb86fc")
                     }
-                    onFocus={(e) => (e.currentTarget.style.outline = "none")}
                     aria-label="Switch to Sign Up"
                   >
                     Sign Up
@@ -130,29 +156,18 @@ function App() {
                 </>
               ) : (
                 <>
-                  <span>Already have an account?</span>
+                  Already have an account?{" "}
                   <button
                     type="button"
                     className="clerk-toggle-button"
                     onClick={() => setShowSignIn(true)}
-                    style={{
-                      all: "unset",
-                      color: "#bb86fc",
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      marginLeft: 8,
-                      userSelect: "none",
-                      fontFamily:
-                        "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-                      fontWeight: "600",
-                    }}
+                    style={toggleLinkStyle}
                     onMouseOver={(e) =>
-                      (e.currentTarget.style.color = "#9a69e")
+                      (e.currentTarget.style.color = "#9a69e0")
                     }
                     onMouseOut={(e) =>
                       (e.currentTarget.style.color = "#bb86fc")
                     }
-                    onFocus={(e) => (e.currentTarget.style.outline = "none")}
                     aria-label="Switch to Sign In"
                   >
                     Sign In
@@ -160,10 +175,9 @@ function App() {
                 </>
               )}
             </div>
-          </div>
+          </main>
         </SignedOut>
 
-        {/* Show app when user is signed in */}
         <SignedIn>
           <BrowserRouter>
             <Navbar />
