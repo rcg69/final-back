@@ -5,7 +5,7 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Banner images
+  // Banner images - customize as needed
   const bannerImages = [
     "https://m.media-amazon.com/images/S/al-eu-726f4d26-7fdb/e9512ab9-474c-49b4-9b56-1d004a582fd5._CR0%2C0%2C3000%2C600_SX1500_.jpg",
     "https://www.agoda.com/press/wp-content/uploads/2025/02/screenshot.png",
@@ -31,18 +31,10 @@ function Home() {
     fetchScratchCards();
   }, []);
 
-  // Banner slider with fade effect & responsive sizing
+  // Banner slider with fade effect
   const BannerSlider = ({ images, interval = 6000 }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const timeoutRef = useRef(null);
-
-    // Track window width for responsiveness
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    useEffect(() => {
-      const handleResize = () => setWindowWidth(window.innerWidth);
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }, []);
 
     useEffect(() => {
       timeoutRef.current = setTimeout(() => {
@@ -53,21 +45,43 @@ function Home() {
 
     const bannerStyle = {
       position: "relative",
-      width: windowWidth <= 600 ? "100vw" : "100%",      // full viewport width on phone, container width on larger screens
-      maxWidth: "100vw",
-      height: windowWidth <= 600 ? "30vh" : "50vh",
-      maxHeight: windowWidth <= 600 ? "200px" : "300px",
+      width: "100vw", // full viewport width
+      height: "50vh",
       overflow: "hidden",
       borderRadius: "0 0 20px 20px",
       boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
       backgroundColor: "#232323",
       marginBottom: 24,
-      boxSizing: "border-box",
-      userSelect: "none",
-      zIndex: 1,
       left: "50%",
       right: "50%",
       transform: "translateX(-50%)", // centers the banner horizontally safely
+      boxSizing: "border-box",
+      userSelect: "none",
+      zIndex: 1,
+      maxHeight: "300px",
+
+      // Responsive height adjustment
+      "@media (max-width: 600px)": {
+        height: "30vh",
+        maxHeight: "200px",
+      },
+    };
+
+    // Note: Inline styles do not support media queries directly.
+    // We handle this with JS below instead.
+
+    // Responsive: dynamically adjust banner height based on window width
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    useEffect(() => {
+      const handleResize = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    const adjustedBannerStyle = {
+      ...bannerStyle,
+      height: windowWidth <= 600 ? "30vh" : "50vh",
+      maxHeight: windowWidth <= 600 ? "200px" : "300px",
     };
 
     const imageStyle = {
@@ -85,7 +99,7 @@ function Home() {
     };
 
     return (
-      <section aria-label="Featured scratch card banners" style={bannerStyle}>
+      <section aria-label="Featured scratch card banners" style={adjustedBannerStyle}>
         {images.map((src, idx) => {
           const isActive = idx === currentIndex;
           return (
@@ -107,7 +121,7 @@ function Home() {
     );
   };
 
-  // Wrapper style for scratch cards container to avoid horizontal scroll on mobile
+  // Responsive scratch card container wrapper style (to avoid horizontal scroll on mobiles)
   const scratchCardsWrapperStyle = {
     width: "100%",
     maxWidth: "100vw",
@@ -128,24 +142,29 @@ function Home() {
           boxSizing: "border-box",
         }}
       >
+        {/* Banner below navbar */}
         <BannerSlider images={bannerImages} interval={6000} />
 
+        {/* Page Heading */}
         <h2 className="main-heading" style={{ paddingLeft: "16px" }}>
           All Scratch Cards
         </h2>
 
+        {/* Error message */}
         {error && (
           <div className="error-message" style={{ color: "tomato", textAlign: "center" }}>
             Error: {error}
           </div>
         )}
 
+        {/* Loading message */}
         {loading && (
           <div className="loading-message" style={{ fontStyle: "italic", textAlign: "center" }}>
             Loading scratch cards...
           </div>
         )}
 
+        {/* Scratch cards grid */}
         {!loading && !error && (
           <div className="scratch-cards-grid" style={scratchCardsWrapperStyle}>
             {scratchCards.length === 0 && (
