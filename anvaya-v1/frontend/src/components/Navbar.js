@@ -42,12 +42,10 @@ function Navbar() {
   const navbarRowStyle = {
     display: "flex",
     width: "100%",
-    maxWidth: 1200,
     margin: "0 auto",
     alignItems: "center",
-    justifyContent: "space-between",
     padding: "0 24px",
-    flexWrap: "wrap", // allow wrapping on small screens
+    flexWrap: "wrap",
   };
 
   const navbarLeftStyle = {
@@ -84,7 +82,7 @@ function Navbar() {
     cursor: "pointer",
     fontSize: 28,
     color: "#eeeeee",
-    display: "none", // default hidden, shown on mobile via JS
+    display: "none",
   };
 
   const navLinksStyle = {
@@ -109,10 +107,6 @@ function Navbar() {
     userSelect: "none",
   };
 
-  const navLinkHoverStyle = {
-    color: "#bb86fc",
-  };
-
   const navbarRightStyle = {
     display: "flex",
     alignItems: "center",
@@ -135,10 +129,6 @@ function Navbar() {
     fontSize: 16,
     outline: "none",
     minWidth: 120,
-  };
-
-  const searchInputMobileStyle = {
-    minWidth: 80,
   };
 
   const searchButtonStyle = {
@@ -167,13 +157,30 @@ function Navbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Desktop/laptop layout adjustments (do NOT change anything for mobile)
+  if (windowWidth > 700) {
+    navbarRowStyle.maxWidth = "100vw";
+    navbarRowStyle.justifyContent = "flex-start";
+    navbarRowStyle.padding = "0 42px";
+
+    navbarLeftStyle.gap = 16;
+    navLinksStyle.display = "flex";
+    navLinksStyle.marginLeft = 24; // spacing between brand and nav links
+
+    navbarRightStyle.marginLeft = "auto";
+    navbarRightStyle.gap = 18;
+  } else {
+    navbarRowStyle.maxWidth = 1200;
+    navbarRowStyle.justifyContent = "space-between";
+    navbarRowStyle.padding = "0 24px";
+    navbarRightStyle.marginLeft = 0;
+  }
+
   // Show toggle button on mobile
   if (windowWidth <= 700) {
     toggleButtonStyle.display = "block";
   } else {
     toggleButtonStyle.display = "none";
-    // Always show nav links on desktop
-    navLinksStyle.display = "flex";
     navLinksMobileStyle.display = "none";
     if (showLinks) setShowLinks(false);
   }
@@ -201,7 +208,6 @@ function Navbar() {
           >
             &#9776;
           </button>
-          {/* Navigation links for desktop */}
           {windowWidth > 700 ? (
             <div style={navLinksStyle}>
               <Link to="/postcard" style={navLinkStyle}>
@@ -215,7 +221,6 @@ function Navbar() {
               </Link>
             </div>
           ) : (
-            // Mobile collapsible nav links
             <div style={navLinksMobileStyle} aria-hidden={!showLinks}>
               <Link to="/postcard" style={navLinkStyle} onClick={() => setShowLinks(false)}>
                 Post
