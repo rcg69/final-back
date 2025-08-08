@@ -1,8 +1,9 @@
-// routes/scratchCardRoutes.js
+// backend/routes/scratchCardRoutes.js
 
 const express = require('express');
 const router = express.Router();
 const ScratchCard = require('../models/scratchCardModel');
+
 
 // GET /api/scratchCards - fetch all non-expired cards sorted newest first
 router.get('/', async (req, res) => {
@@ -16,14 +17,16 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/scratchCards - create new card with expiryDate and posterEmail validation
+
+// POST /api/scratchCards - create new card with expiryDate and posterId & posterEmail validation
 router.post('/', async (req, res) => {
   try {
-    const { title, description, imageUrl, price, expiryDate, posterEmail } = req.body;
+    const { title, description, imageUrl, price, expiryDate, posterEmail, posterId } = req.body;
 
     if (!title) return res.status(400).json({ error: 'Title is required' });
     if (!expiryDate) return res.status(400).json({ error: 'expiryDate is required' });
     if (!posterEmail) return res.status(400).json({ error: 'posterEmail is required' });
+    if (!posterId) return res.status(400).json({ error: 'posterId is required' });
 
     const expiry = new Date(expiryDate);
     if (isNaN(expiry.getTime())) return res.status(400).json({ error: 'expiryDate is not a valid date' });
@@ -39,6 +42,7 @@ router.post('/', async (req, res) => {
       price,
       expiryDate: expiry,
       posterEmail,
+      posterId,        // Save posterId here
     });
 
     await newCard.save();
@@ -50,18 +54,19 @@ router.post('/', async (req, res) => {
   }
 });
 
-// DELETE /api/scratchCards/:id - delete only if posterEmail matches
+
+// DELETE /api/scratchCards/:id - delete only if posterId matches
 router.delete('/:id', async (req, res) => {
   try {
     const cardId = req.params.id;
-    const { posterEmail } = req.body;
+    const { posterId } = req.body;
 
-    if (!posterEmail) return res.status(400).json({ error: 'posterEmail is required to delete card' });
+    if (!posterId) return res.status(400).json({ error: 'posterId is required to delete card' });
 
     const card = await ScratchCard.findById(cardId);
     if (!card) return res.status(404).json({ error: 'Scratch card not found' });
 
-    if (card.posterEmail !== posterEmail)
+    if (card.posterId !== posterId)
       return res.status(403).json({ error: 'Not authorized to delete this card' });
 
     await ScratchCard.findByIdAndDelete(cardId);
@@ -72,6 +77,9 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to delete scratch card' });
   }
 });
+
+
+// Search endpoint unchanged - operates on title or description for non-expired cards
 router.get('/search', async (req, res) => {
   try {
     const { query } = req.query;
@@ -80,8 +88,6 @@ router.get('/search', async (req, res) => {
     }
 
     const regex = new RegExp(query, 'i'); // Case-insensitive search
-
-    // Return cards matching title or description, and not expired
     const now = new Date();
     const results = await ScratchCard.find({
       expiryDate: { $gt: now },
