@@ -3,50 +3,70 @@ require("dotenv").config(); // Load environment variables from .env
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 
 const scratchCardRoutes = require("./api/scratchCards");
 
 const app = express();
 
-// Enable CORS - use FRONTEND_URL env variable for flexibility
+// ----------------------
+// CORS SETTINGS
+// ----------------------
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://anvaya-dm8j.onrender.com", // Use your frontend deployed URL here
+  origin: process.env.FRONTEND_URL || "https://anvaya-dm8j.onrender.com", // Frontend origin
   optionsSuccessStatus: 200
 }));
 
-// Middleware to parse JSON bodies
+// ----------------------
+// PARSE JSON REQUESTS
+// ----------------------
 app.use(express.json());
 
-// Validate required environment variable
+// ----------------------
+// SERVE UPLOADED FILES
+// ----------------------
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ----------------------
+// CHECK REQUIRED ENV VARS
+// ----------------------
 if (!process.env.MONGO_URI) {
-  console.error("Error: MONGO_URI is not defined in environment variables.");
+  console.error("❌ Error: MONGO_URI is not defined in environment variables.");
   process.exit(1);
 }
-console.log("Mongo URI:", process.env.MONGO_URI);
+console.log("✅ Mongo URI found");
 
-// Connect to MongoDB
+// ----------------------
+// CONNECT TO MONGODB
+// ----------------------
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log("⚡ MongoDB connected"))
+.then(() => console.log("⚡ MongoDB connected successfully"))
 .catch((err) => {
-  console.error("MongoDB connection error:", err);
+  console.error("❌ MongoDB connection error:", err);
   process.exit(1);
 });
 
-// Healthcheck endpoint
+// ----------------------
+// HEALTHCHECK ENDPOINT
+// ----------------------
 app.get("/", (req, res) => {
-  res.send("Backend server is running");
+  res.send("✅ Backend server is running");
 });
 
-// Mount API routes at /api/scratchCards
+// ----------------------
+// API ROUTES
+// ----------------------
 app.use("/api/scratchCards", scratchCardRoutes);
 
-// Start server: listen on provided PORT and all network interfaces (0.0.0.0)
+// ----------------------
+// START SERVER
+// ----------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`⚡ Server running on port ${PORT}`);
+  console.log(`🚀 Server running at http://0.0.0.0:${PORT}`);
 });
 
 module.exports = app;
