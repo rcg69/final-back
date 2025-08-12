@@ -1,4 +1,4 @@
-require("dotenv").config(); // Load environment variables from .env
+require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -9,36 +9,26 @@ const scratchCardRoutes = require("./api/scratchCards");
 
 const app = express();
 
-// ----------------------
-// CORS SETTINGS
-// ----------------------
+// Enable CORS - frontend URL from env
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://anvaya-dm8j.onrender.com", // Frontend origin
-  optionsSuccessStatus: 200
+  origin: process.env.FRONTEND_URL || "https://anvaya-dm8j.onrender.com",
+  optionsSuccessStatus: 200,
 }));
 
-// ----------------------
-// PARSE JSON REQUESTS
-// ----------------------
+// Parse JSON request bodies
 app.use(express.json());
 
-// ----------------------
-// SERVE UPLOADED FILES
-// ----------------------
+// Serve uploaded images statically
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ----------------------
-// CHECK REQUIRED ENV VARS
-// ----------------------
+// Check for MONGO_URI environment variable
 if (!process.env.MONGO_URI) {
   console.error("❌ Error: MONGO_URI is not defined in environment variables.");
   process.exit(1);
 }
 console.log("✅ Mongo URI found");
 
-// ----------------------
-// CONNECT TO MONGODB
-// ----------------------
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -49,21 +39,15 @@ mongoose.connect(process.env.MONGO_URI, {
   process.exit(1);
 });
 
-// ----------------------
-// HEALTHCHECK ENDPOINT
-// ----------------------
+// Healthcheck endpoint
 app.get("/", (req, res) => {
   res.send("✅ Backend server is running");
 });
 
-// ----------------------
-// API ROUTES
-// ----------------------
+// Mount API routes
 app.use("/api/scratchCards", scratchCardRoutes);
 
-// ----------------------
-// START SERVER
-// ----------------------
+// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running at http://0.0.0.0:${PORT}`);

@@ -5,21 +5,20 @@ const ScratchCard = require('../models/scratchCardModel');
 
 const router = express.Router();
 
-// File upload settings
+// Setup multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // store in /uploads directory
+    cb(null, 'uploads/'); // Folder to store uploaded images
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + '-' + file.originalname);
   },
 });
-
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    if (ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png') {
+    if (!['.jpg', '.jpeg', '.png'].includes(ext)) {
       return cb(new Error('Only images are allowed'));
     }
     cb(null, true);
@@ -38,7 +37,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST create scratch card (text or image-based description)
+// POST new scratch card - handle multipart/form-data if image description sent
 router.post('/', upload.single('descriptionImage'), async (req, res) => {
   try {
     const { title, description, imageUrl, price, expiryDate, posterEmail } = req.body;
@@ -56,12 +55,12 @@ router.post('/', upload.single('descriptionImage'), async (req, res) => {
 
     let descriptionImageUrl = null;
     if (req.file) {
-      descriptionImageUrl = `/uploads/${req.file.filename}`; // store relative path
+      descriptionImageUrl = `/uploads/${req.file.filename}`; // Save relative path for frontend loading
     }
 
     const newCard = new ScratchCard({
       title,
-      description: req.file ? null : description, // null if using image
+      description: req.file ? null : description,
       descriptionImageUrl,
       imageUrl,
       price,
@@ -71,14 +70,13 @@ router.post('/', upload.single('descriptionImage'), async (req, res) => {
 
     await newCard.save();
     res.status(201).json(newCard);
-
   } catch (err) {
     console.error('Error creating scratch card:', err);
     res.status(500).json({ error: 'Failed to create scratch card' });
   }
 });
 
-// DELETE scratch card
+// DELETE scratch card (authorized by posterEmail)
 router.delete('/:id', async (req, res) => {
   try {
     const cardId = req.params.id;
@@ -89,8 +87,9 @@ router.delete('/:id', async (req, res) => {
     const card = await ScratchCard.findById(cardId);
     if (!card) return res.status(404).json({ error: 'Scratch card not found' });
 
-    if (card.posterEmail !== posterEmail)
+    if (card.posterEmail !== posterEmail) {
       return res.status(403).json({ error: 'Not authorized to delete this card' });
+    }
 
     await ScratchCard.findByIdAndDelete(cardId);
     res.json({ message: 'Scratch card deleted successfully.' });
@@ -100,7 +99,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Search scratch cards
+// Search scratch cards by title or description text
 router.get('/search', async (req, res) => {
   try {
     const { query } = req.query;
@@ -110,15 +109,15 @@ router.get('/search', async (req, res) => {
 
     const regex = new RegExp(query.trim(), 'i');
     const now = new Date();
-    const results = await ScratchCard.find({
+    const cards = await ScratchCard.find({
       expiryDate: { $gt: now },
       $or: [
         { title: regex },
-        { description: regex } // will skip if description is null
-      ]
+        { description: regex }
+      ],
     }).sort({ createdAt: -1 });
 
-    res.json(results);
+    res.json(cards);
   } catch (err) {
     console.error("Error during scratch card search:", err);
     res.status(500).json({ error: "Failed to search scratch cards" });

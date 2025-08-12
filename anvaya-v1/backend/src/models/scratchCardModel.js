@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const scratchCardSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  description: String, // optional text description
-  descriptionImageUrl: String, // NEW field for image-based description
+  description: String, // Optional text description
+  descriptionImageUrl: String, // Optional image description URL
   imageUrl: String,
   price: String,
   expiryDate: { type: Date, required: true, index: { expires: 0 } }, // TTL auto-delete
