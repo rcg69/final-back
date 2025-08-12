@@ -5,13 +5,19 @@ const ScratchCard = require('../models/scratchCardModel');
 
 const router = express.Router();
 
-// Multer storage config for uploads
+// ----------------------
+// Multer storage config for uploads (absolute path & safe filenames)
+// ----------------------
+const uploadDir = path.join(__dirname, '..', 'uploads');
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // folder for uploaded images
+    cb(null, uploadDir); // Absolute path
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
+    // Replace spaces with underscores and prepend timestamp
+    const safeName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
+    cb(null, safeName);
   },
 });
 
@@ -26,7 +32,9 @@ const upload = multer({
   },
 });
 
+// ----------------------
 // GET all non-expired scratch cards
+// ----------------------
 router.get('/', async (req, res) => {
   try {
     const now = new Date();
@@ -38,11 +46,15 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST create scratch card, supports multipart form for image description
+// ----------------------
+// POST create scratch card (supports text or image description)
+// ----------------------
 router.post('/', upload.single('descriptionImage'), async (req, res) => {
   try {
+    // Multer populates req.body for text fields in multipart/form-data
     const { title, description, imageUrl, price, expiryDate, posterEmail } = req.body;
 
+    // Validations
     if (!title) return res.status(400).json({ error: 'Title is required' });
     if (!expiryDate) return res.status(400).json({ error: 'expiryDate is required' });
     if (!posterEmail) return res.status(400).json({ error: 'posterEmail is required' });
@@ -54,9 +66,10 @@ router.post('/', upload.single('descriptionImage'), async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(posterEmail)) return res.status(400).json({ error: 'Invalid email format' });
 
+    // Handle uploaded image (if any)
     let descriptionImageUrl = null;
     if (req.file) {
-      descriptionImageUrl = `/uploads/${req.file.filename}`; // relative path for frontend usage
+      descriptionImageUrl = `/uploads/${req.file.filename}`;
     }
 
     const newCard = new ScratchCard({
@@ -77,7 +90,9 @@ router.post('/', upload.single('descriptionImage'), async (req, res) => {
   }
 });
 
+// ----------------------
 // DELETE endpoint (authorized by posterEmail)
+// ----------------------
 router.delete('/:id', async (req, res) => {
   try {
     const cardId = req.params.id;
@@ -100,12 +115,14 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ----------------------
 // SEARCH cards by title or description text
+// ----------------------
 router.get('/search', async (req, res) => {
   try {
     const { query } = req.query;
-    if (!query || query.trim() === "") {
-      return res.status(400).json({ error: "Query parameter is required" });
+    if (!query || query.trim() === '') {
+      return res.status(400).json({ error: 'Query parameter is required' });
     }
 
     const regex = new RegExp(query.trim(), 'i');
@@ -114,14 +131,14 @@ router.get('/search', async (req, res) => {
       expiryDate: { $gt: now },
       $or: [
         { title: regex },
-        { description: regex }
+        { description: regex },
       ],
     }).sort({ createdAt: -1 });
 
     res.json(cards);
   } catch (err) {
-    console.error("Error searching scratch cards:", err);
-    res.status(500).json({ error: "Failed to search scratch cards" });
+    console.error('Error searching scratch cards:', err);
+    res.status(500).json({ error: 'Failed to search scratch cards' });
   }
 });
 
