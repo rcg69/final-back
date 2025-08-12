@@ -1,55 +1,68 @@
 const express = require('express');
-const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const ScratchCard = require('../models/scratchCardModel');
 
-// GET /api/scratchCards
-// Fetch all non-expired scratch cards, newest first
+const router = express.Router();
+
+// Multer storage config for uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // folder for uploaded images
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!['.jpg', '.jpeg', '.png'].includes(ext)) {
+      return cb(new Error('Only images are allowed'));
+    }
+    cb(null, true);
+  },
+});
+
+// GET all non-expired scratch cards
 router.get('/', async (req, res) => {
   try {
     const now = new Date();
     const cards = await ScratchCard.find({ expiryDate: { $gt: now } }).sort({ createdAt: -1 });
     res.json(cards);
-  } catch (error) {
-    console.error('Error fetching scratch cards:', error);
+  } catch (err) {
+    console.error('Error fetching scratch cards:', err);
     res.status(500).json({ error: 'Failed to fetch scratch cards' });
   }
 });
 
-// POST /api/scratchCards
-// Create a new scratch card with required expiryDate and posterEmail
-router.post('/', async (req, res) => {
+// POST create scratch card, supports multipart form for image description
+router.post('/', upload.single('descriptionImage'), async (req, res) => {
   try {
     const { title, description, imageUrl, price, expiryDate, posterEmail } = req.body;
 
-    // Validate required fields
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
-    if (!expiryDate) {
-      return res.status(400).json({ error: 'expiryDate is required' });
-    }
-    if (!posterEmail) {
-      return res.status(400).json({ error: 'posterEmail is required' });
-    }
+    if (!title) return res.status(400).json({ error: 'Title is required' });
+    if (!expiryDate) return res.status(400).json({ error: 'expiryDate is required' });
+    if (!posterEmail) return res.status(400).json({ error: 'posterEmail is required' });
 
-    // Validate expiryDate is a valid future date
     const expiry = new Date(expiryDate);
-    if (isNaN(expiry.getTime())) {
-      return res.status(400).json({ error: 'expiryDate is not a valid date' });
-    }
-    if (expiry <= new Date()) {
-      return res.status(400).json({ error: 'expiryDate must be a future date' });
-    }
+    if (isNaN(expiry.getTime())) return res.status(400).json({ error: 'expiryDate is not a valid date' });
+    if (expiry <= new Date()) return res.status(400).json({ error: 'expiryDate must be a future date' });
 
-    // Simple email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(posterEmail)) {
-      return res.status(400).json({ error: 'Invalid email format for posterEmail' });
+    if (!emailRegex.test(posterEmail)) return res.status(400).json({ error: 'Invalid email format' });
+
+    let descriptionImageUrl = null;
+    if (req.file) {
+      descriptionImageUrl = `/uploads/${req.file.filename}`; // relative path for frontend usage
     }
 
     const newCard = new ScratchCard({
       title,
-      description,
+      description: req.file ? null : description,
+      descriptionImageUrl,
       imageUrl,
       price,
       expiryDate: expiry,
@@ -57,45 +70,37 @@ router.post('/', async (req, res) => {
     });
 
     await newCard.save();
-
     res.status(201).json(newCard);
-  } catch (error) {
-    console.error('Error creating scratch card:', error);
+  } catch (err) {
+    console.error('Error creating scratch card:', err);
     res.status(500).json({ error: 'Failed to create scratch card' });
   }
 });
 
-// DELETE /api/scratchCards/:id
-// Delete a scratch card only if the requesting posterEmail matches the card's posterEmail
+// DELETE endpoint (authorized by posterEmail)
 router.delete('/:id', async (req, res) => {
   try {
     const cardId = req.params.id;
-    const { posterEmail } = req.body; // posterEmail required to authorize delete
+    const { posterEmail } = req.body;
 
-    if (!posterEmail) {
-      return res.status(400).json({ error: 'posterEmail is required to delete scratch card' });
-    }
+    if (!posterEmail) return res.status(400).json({ error: 'posterEmail is required' });
 
     const card = await ScratchCard.findById(cardId);
-    if (!card) {
-      return res.status(404).json({ error: 'Scratch card not found' });
-    }
+    if (!card) return res.status(404).json({ error: 'Scratch card not found' });
 
     if (card.posterEmail !== posterEmail) {
-      return res.status(403).json({ error: 'Not authorized to delete this scratch card' });
+      return res.status(403).json({ error: 'Not authorized to delete this card' });
     }
 
     await ScratchCard.findByIdAndDelete(cardId);
-
     res.json({ message: 'Scratch card deleted successfully.' });
-  } catch (error) {
-    console.error('Error deleting scratch card:', error);
+  } catch (err) {
+    console.error('Error deleting scratch card:', err);
     res.status(500).json({ error: 'Failed to delete scratch card' });
   }
 });
 
-// GET /api/scratchCards/search?query=...
-// Search scratch cards by title or description matching query (case-insensitive), excluding expired cards
+// SEARCH cards by title or description text
 router.get('/search', async (req, res) => {
   try {
     const { query } = req.query;
@@ -103,20 +108,19 @@ router.get('/search', async (req, res) => {
       return res.status(400).json({ error: "Query parameter is required" });
     }
 
-    const regex = new RegExp(query.trim(), 'i'); // case-insensitive regex
-
+    const regex = new RegExp(query.trim(), 'i');
     const now = new Date();
     const cards = await ScratchCard.find({
       expiryDate: { $gt: now },
       $or: [
         { title: regex },
         { description: regex }
-      ]
+      ],
     }).sort({ createdAt: -1 });
 
     res.json(cards);
   } catch (err) {
-    console.error("Error during scratch card search:", err);
+    console.error("Error searching scratch cards:", err);
     res.status(500).json({ error: "Failed to search scratch cards" });
   }
 });

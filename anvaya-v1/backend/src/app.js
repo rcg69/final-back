@@ -9,19 +9,19 @@ const scratchCardRoutes = require("./api/scratchCards");
 
 const app = express();
 
-// Enable CORS - frontend URL from env
+// Enable CORS with frontend URL from env
 app.use(cors({
   origin: process.env.FRONTEND_URL || "https://anvaya-dm8j.onrender.com",
   optionsSuccessStatus: 200,
 }));
 
-// Parse JSON request bodies
+// Middleware to parse JSON requests
 app.use(express.json());
 
-// Serve uploaded images statically
+// Serve uploaded files statically to frontend
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Check for MONGO_URI environment variable
+// Validate environment variable
 if (!process.env.MONGO_URI) {
   console.error("❌ Error: MONGO_URI is not defined in environment variables.");
   process.exit(1);
@@ -39,7 +39,7 @@ mongoose.connect(process.env.MONGO_URI, {
   process.exit(1);
 });
 
-// Healthcheck endpoint
+// Simple healthcheck endpoint
 app.get("/", (req, res) => {
   res.send("✅ Backend server is running");
 });
@@ -47,7 +47,7 @@ app.get("/", (req, res) => {
 // Mount API routes
 app.use("/api/scratchCards", scratchCardRoutes);
 
-// Start server
+// Start server on specified port
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running at http://0.0.0.0:${PORT}`);
