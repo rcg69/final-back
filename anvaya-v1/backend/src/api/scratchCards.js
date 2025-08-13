@@ -2,25 +2,19 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const ScratchCard = require('../models/scratchCardModel');
+const authRequired = require('../middleware/authRequired'); // Clerk middleware
 
 const router = express.Router();
 
-// ----------------------
-// Multer storage config for uploads (absolute path & safe filenames)
-// ----------------------
+// Multer storage for uploads
 const uploadDir = path.join(__dirname, '..', 'uploads');
-
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir); // Absolute path
-  },
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
-    // Replace spaces with underscores and prepend timestamp
     const safeName = Date.now() + '-' + file.originalname.replace(/\s+/g, '_');
     cb(null, safeName);
-  },
+  }
 });
-
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
@@ -29,12 +23,10 @@ const upload = multer({
       return cb(new Error('Only images are allowed'));
     }
     cb(null, true);
-  },
+  }
 });
 
-// ----------------------
-// GET all non-expired scratch cards
-// ----------------------
+// ✅ GET (Public) – fetch all active scratch cards
 router.get('/', async (req, res) => {
   try {
     const now = new Date();
@@ -46,27 +38,20 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ----------------------
-// POST create scratch card (supports text or image description)
-// ----------------------
-router.post('/', upload.single('descriptionImage'), async (req, res) => {
+// ✅ POST (Protected) – create a scratch card
+router.post('/', authRequired, upload.single('descriptionImage'), async (req, res) => {
   try {
-    // Multer populates req.body for text fields in multipart/form-data
-    const { title, description, imageUrl, price, expiryDate, posterEmail } = req.body;
+    const { title, description, imageUrl, price, expiryDate } = req.body;
+    const posterEmail = req.auth.userId; // Clerk userId as poster reference
 
-    // Validations
     if (!title) return res.status(400).json({ error: 'Title is required' });
     if (!expiryDate) return res.status(400).json({ error: 'expiryDate is required' });
-    if (!posterEmail) return res.status(400).json({ error: 'posterEmail is required' });
 
     const expiry = new Date(expiryDate);
-    if (isNaN(expiry.getTime())) return res.status(400).json({ error: 'expiryDate is not a valid date' });
-    if (expiry <= new Date()) return res.status(400).json({ error: 'expiryDate must be a future date' });
+    if (isNaN(expiry.getTime()) || expiry <= new Date()) {
+      return res.status(400).json({ error: 'expiryDate must be a valid future date' });
+    }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(posterEmail)) return res.status(400).json({ error: 'Invalid email format' });
-
-    // Handle uploaded image (if any)
     let descriptionImageUrl = null;
     if (req.file) {
       descriptionImageUrl = `/uploads/${req.file.filename}`;
@@ -79,7 +64,7 @@ router.post('/', upload.single('descriptionImage'), async (req, res) => {
       imageUrl,
       price,
       expiryDate: expiry,
-      posterEmail,
+      posterEmail, // Clerk userId stored instead of email string
     });
 
     await newCard.save();
@@ -90,24 +75,18 @@ router.post('/', upload.single('descriptionImage'), async (req, res) => {
   }
 });
 
-// ----------------------
-// DELETE endpoint (authorized by posterEmail)
-// ----------------------
-router.delete('/:id', async (req, res) => {
+// ✅ DELETE (Protected) – delete a scratch card
+router.delete('/:id', authRequired, async (req, res) => {
   try {
-    const cardId = req.params.id;
-    const { posterEmail } = req.body;
-
-    if (!posterEmail) return res.status(400).json({ error: 'posterEmail is required' });
-
-    const card = await ScratchCard.findById(cardId);
+    const card = await ScratchCard.findById(req.params.id);
     if (!card) return res.status(404).json({ error: 'Scratch card not found' });
 
-    if (card.posterEmail !== posterEmail) {
+    // Only owner (by stored userId) can delete
+    if (card.posterEmail !== req.auth.userId) {
       return res.status(403).json({ error: 'Not authorized to delete this card' });
     }
 
-    await ScratchCard.findByIdAndDelete(cardId);
+    await card.deleteOne();
     res.json({ message: 'Scratch card deleted successfully.' });
   } catch (err) {
     console.error('Error deleting scratch card:', err);
@@ -115,26 +94,19 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// ----------------------
-// SEARCH cards by title or description text
-// ----------------------
+// ✅ Search (Public)
 router.get('/search', async (req, res) => {
   try {
     const { query } = req.query;
     if (!query || query.trim() === '') {
       return res.status(400).json({ error: 'Query parameter is required' });
     }
-
     const regex = new RegExp(query.trim(), 'i');
     const now = new Date();
     const cards = await ScratchCard.find({
       expiryDate: { $gt: now },
-      $or: [
-        { title: regex },
-        { description: regex },
-      ],
+      $or: [{ title: regex }, { description: regex }]
     }).sort({ createdAt: -1 });
-
     res.json(cards);
   } catch (err) {
     console.error('Error searching scratch cards:', err);
