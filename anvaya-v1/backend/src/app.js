@@ -6,6 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 
+// Middleware for authentication (protects POST & DELETE internally in scratchCards.js)
 const scratchCardRoutes = require("./api/scratchCards");
 
 const app = express();
@@ -16,7 +17,7 @@ const app = express();
 console.log("📍 Backend running from:", __dirname);
 
 // ----------------------
-// Ensure uploads dir exists (recursive for safety)
+// Ensure uploads dir exists
 // ----------------------
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -29,23 +30,25 @@ if (!fs.existsSync(uploadDir)) {
 // ----------------------
 // Enable CORS
 // ----------------------
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://anvaya-dm8j.onrender.com",
-  optionsSuccessStatus: 200,
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "https://anvaya-dm8j.onrender.com",
+    optionsSuccessStatus: 200,
+  })
+);
 
 // ----------------------
-// Middleware to parse JSON requests
+// Middleware to parse JSON (for application/json payloads)
 // ----------------------
 app.use(express.json());
 
 // ----------------------
-// Serve uploaded files statically to frontend
+// Serve uploaded files statically
 // ----------------------
 app.use("/uploads", express.static(uploadDir));
 
 // ----------------------
-// Validate environment variable
+// Validate environment variables
 // ----------------------
 if (!process.env.MONGO_URI) {
   console.error("❌ Error: MONGO_URI is not defined in environment variables.");
@@ -56,8 +59,8 @@ console.log("✅ MONGO_URI found");
 // ----------------------
 // Connect to MongoDB
 // ----------------------
-// Removed deprecated options (Mongo Driver v4 auto-handles them)
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("⚡ MongoDB connected successfully"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
@@ -74,10 +77,11 @@ app.get("/", (req, res) => {
 // ----------------------
 // API routes
 // ----------------------
+// scratchCardRoutes already contains authRequired for POST & DELETE internally
 app.use("/api/scratchCards", scratchCardRoutes);
 
 // ----------------------
-// Catch-all 404 (prevents HTML errors for API requests)
+// 404 handler
 // ----------------------
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
